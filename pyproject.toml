@@ -1,0 +1,19 @@
+[project]
+name = "crm-hygiene-audit"
+version = "0.2.0"
+description = "Find duplicates, gaps and stuck deals in a HubSpot export, and score overall CRM health."
+requires-python = ">=3.10"
+dependencies = ["pandas>=2.0", "rapidfuzz>=3.0"]
+
+[project.optional-dependencies]
+dev = ["pytest>=7"]
+
+[project.scripts]
+crmaudit = "crmaudit.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["crmaudit*"]
