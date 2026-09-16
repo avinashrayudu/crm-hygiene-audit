@@ -11,7 +11,7 @@ from datetime import date, datetime
 import pandas as pd
 from rapidfuzz import fuzz
 
-from .normalize import company_name, domain, email_problem
+from .normalize import as_text, company_name, domain, email_problem
 
 
 def _issue(obj, rid, check, detail, severity):
@@ -106,7 +106,7 @@ def contact_quality(contacts: pd.DataFrame, role_prefixes: list[str]) -> list[di
         if problem and problem != "missing email":
             sev = "high" if problem in ("malformed email", "role inbox") else "low"
             issues.append(_issue("contact", rid, problem, str(row.get("email")), sev))
-        email = str(row.get("email") or "").strip().lower()
+        email = as_text(row.get("email")).strip().lower()
         if email and email != "nan":
             if email in seen:
                 issues.append(_issue("contact", rid, "duplicate contact", f"same email as {seen[email]}", "high"))
@@ -119,11 +119,11 @@ def orphans(contacts: pd.DataFrame, deals: pd.DataFrame, companies: pd.DataFrame
     known = set(companies["company_id"].astype(str))
     issues = []
     for _, row in contacts.iterrows():
-        cid = str(row.get("associated_company_id") or "").split(".")[0]
+        cid = as_text(row.get("associated_company_id")).split(".")[0]
         if cid in ("", "nan") or cid not in known:
             issues.append(_issue("contact", row["contact_id"], "orphan contact", "no valid company association", "medium"))
     for _, row in deals.iterrows():
-        cid = str(row.get("associated_company_id") or "").split(".")[0]
+        cid = as_text(row.get("associated_company_id")).split(".")[0]
         if cid in ("", "nan") or cid not in known:
             issues.append(_issue("deal", row["deal_id"], "orphan deal", "no valid company association", "high"))
     return issues
@@ -166,7 +166,7 @@ def funnel(deals: pd.DataFrame, stage_order: list[str], today: date,
     for _, row in deals.iterrows():
         stage = str(row.get("dealstage"))
         if stage == "closed_lost":
-            stage = str(row.get("lost_at_stage") or stage_order[0])
+            stage = as_text(row.get("lost_at_stage")) or stage_order[0]
         reached_level.append(idx.get(stage, 0))
     s = pd.Series(reached_level)
     counts = [int((s >= i).sum()) for i in range(len(stage_order))]

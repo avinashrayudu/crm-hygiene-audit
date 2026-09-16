@@ -7,7 +7,7 @@ EMAIL_RE = re.compile(r"^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}$")
 SUFFIX_RE = re.compile(r"\b(inc|llc|ltd|co|corp|corporation|company)\b\.?", re.I)
 
 
-def _text(value) -> str:
+def as_text(value) -> str:
     """str() that treats None, NaN and pandas NA as empty."""
     try:
         if value is None or value != value:
@@ -18,7 +18,7 @@ def _text(value) -> str:
 
 
 def domain(value) -> str:
-    v = _text(value).strip().lower()
+    v = as_text(value).strip().lower()
     if v in ("", "nan", "none", "<na>"):
         return ""
     v = re.sub(r"^[a-z]+://", "", v)
@@ -27,14 +27,14 @@ def domain(value) -> str:
 
 
 def company_name(value) -> str:
-    v = _text(value).lower()
+    v = as_text(value).lower()
     v = SUFFIX_RE.sub(" ", v)
     v = re.sub(r"[^a-z0-9 ]", " ", v)
     return re.sub(r"\s+", " ", v).strip()
 
 
 def email_problem(value, role_prefixes: list[str]) -> str:
-    v = _text(value).strip().lower()
+    v = as_text(value).strip().lower()
     if v in ("", "nan", "<na>"):
         return "missing email"
     if not EMAIL_RE.match(v):

@@ -21,7 +21,7 @@ class AuditResult:
 
 
 def load(folder: Path) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    read = lambda n: pd.read_csv(folder / n, dtype=str, keep_default_na=False).replace("", pd.NA)
+    read = lambda n: pd.read_csv(folder / n, dtype=str)  # blanks come back as NaN
     return read("companies.csv"), read("contacts.csv"), read("deals.csv")
 
 
